@@ -1,3 +1,4 @@
+// lib/app.dart
 import 'package:batch_35d_assignment_2/screens/application_screen.dart';
 import 'package:flutter/material.dart';
 

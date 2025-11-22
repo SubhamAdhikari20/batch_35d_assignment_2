@@ -1,3 +1,5 @@
+// lib/screens/application_screen.dart
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 class ApplicationScreen extends StatefulWidget {
@@ -8,6 +10,132 @@ class ApplicationScreen extends StatefulWidget {
 }
 
 class _ApplicationScreenState extends State<ApplicationScreen> {
+  final Random random = Random();
+
+  late int random1;
+  late int random2;
+  String result = "";
+  int correct = 0;
+  int incorrect = 0;
+  Color resultColor = Colors.white;
+
+  @override
+  void initState() {
+    super.initState();
+    generateRandomNumbers();
+  }
+
+  void generateRandomNumbers() {
+    setState(() {
+      random1 = random.nextInt(100);
+      random2 = random.nextInt(100);
+    });
+  }
+
+  void checkNumbersLeftButton() {
+    if (correct + incorrect < 10) {
+      bool check = random1 > random2;
+      displayResult(check);
+    } else {
+      showGameOverDialog();
+    }
+  }
+
+  void checkNumbersRightButton() {
+    if (correct + incorrect < 10) {
+      bool check = random1 < random2;
+      displayResult(check);
+    } else {
+      showGameOverDialog();
+    }
+  }
+
+  void displayResult(bool check) {
+    setState(() {
+      if (check) {
+        correct++;
+      } else {
+        incorrect++;
+      }
+
+      if (correct + incorrect == 10) {
+        if (correct > 5) {
+          result = "You won!!";
+          resultColor = Colors.green;
+        } else if (correct == 5 && incorrect == 5) {
+          result = "Draw!!";
+          resultColor = Colors.blue;
+        } else {
+          result = "You lose!!";
+          resultColor = Colors.red;
+        }
+      } else {
+        generateRandomNumbers();
+      }
+    });
+  }
+
+  void showGameOverDialog() {
+    showDialog(
+      context: context,
+      // barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text("Game Over!", textAlign: TextAlign.center),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Your Score: $correct / 10",
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              correct > 5
+                  ? "You Won!!"
+                  : (correct == 5 && incorrect == 5)
+                  ? "Draw!!"
+                  : "You Lose!!",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: correct > 5
+                    ? Colors.green
+                    : (correct == 5 && incorrect == 5)
+                    ? Colors.blue
+                    : Colors.red,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // close dialog
+                resetGame();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text("Play Again"),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void resetGame() {
+    setState(() {
+      correct = 0;
+      incorrect = 0;
+      resultColor = Colors.white;
+      result = "";
+    });
+    generateRandomNumbers();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +165,9 @@ class _ApplicationScreenState extends State<ApplicationScreen> {
                   SizedBox(
                     width: 125,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        checkNumbersLeftButton();
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.lightBlueAccent,
                         foregroundColor: Colors.white,
@@ -53,13 +183,15 @@ class _ApplicationScreenState extends State<ApplicationScreen> {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      child: const Text("7"),
+                      child: Text("$random1"),
                     ),
                   ),
                   SizedBox(
                     width: 125,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        checkNumbersRightButton();
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.lightBlueAccent,
                         foregroundColor: Colors.white,
@@ -75,7 +207,7 @@ class _ApplicationScreenState extends State<ApplicationScreen> {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      child: const Text("12"),
+                      child: Text("$random2"),
                     ),
                   ),
                 ],
@@ -111,8 +243,8 @@ class _ApplicationScreenState extends State<ApplicationScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            const Text(
-                              "Correct",
+                            Text(
+                              "$correct",
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
@@ -131,8 +263,8 @@ class _ApplicationScreenState extends State<ApplicationScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            const Text(
-                              "Incorrect",
+                            Text(
+                              "$incorrect",
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
@@ -148,18 +280,18 @@ class _ApplicationScreenState extends State<ApplicationScreen> {
                       padding: EdgeInsets.all(5),
                       decoration: BoxDecoration(
                         color: Colors.white70,
-                        border: Border.all(color: Colors.red, width: 2.0),
+                        border: Border.all(color: resultColor, width: 2.0),
                         borderRadius: BorderRadius.circular(10),
                       ),
 
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
-                            "Result!",
+                          Text(
+                            result,
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.red,
+                              color: resultColor,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -172,7 +304,9 @@ class _ApplicationScreenState extends State<ApplicationScreen> {
               SizedBox(
                 width: 150,
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    resetGame();
+                  },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.green,
                     padding: const EdgeInsets.symmetric(
